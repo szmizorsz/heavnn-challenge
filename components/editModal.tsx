@@ -21,6 +21,7 @@ interface Props {
     id: number;
     title: string;
     body: string;
+    userId: number;
   }) => void;
 }
 
@@ -34,6 +35,7 @@ export default function EditModal({
     id: 0,
     title: "",
     body: "",
+    userId: 0,
   });
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -46,7 +48,7 @@ export default function EditModal({
   };
 
   const handleCancel = () => {
-    setEditedPost({ id: 0, title: "", body: "" });
+    setEditedPost({ id: 0, title: "", body: "", userId: 0 });
     onClose();
   };
 
