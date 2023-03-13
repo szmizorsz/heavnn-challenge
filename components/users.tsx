@@ -15,15 +15,20 @@ import {
 } from "@chakra-ui/react";
 import useUsers from "@/hooks/useUsers";
 import UserDetailModal from "./userDetailModal";
-import { User } from "@/types/customTypes";
+import { User, Post } from "@/types/customTypes";
+import usePosts from "@/hooks/usePosts";
+import UsersPost from "./usersPost";
 
 export default function Users() {
   const { users } = useUsers();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
+  const { posts } = usePosts();
+  const [userPosts, setUserPosts] = useState<Post[]>([]);
 
   const handleViewDetails = (user: User) => {
     setSelectedUser(user);
+    setUserPosts(posts.filter((post: Post) => post.userId === user.id));
     onOpen();
   };
 
@@ -55,6 +60,15 @@ export default function Users() {
                   View Details
                 </Button>
               </Td>
+              <Td>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => handleViewDetails(user)}
+                >
+                  View Posts
+                </Button>
+              </Td>
             </Tr>
           ))}
         </Tbody>
@@ -63,6 +77,12 @@ export default function Users() {
         isOpen={isOpen}
         onClose={onClose}
         selectedUser={selectedUser}
+      />
+      <UsersPost
+        isOpen={isOpen}
+        onClose={onClose}
+        selectedUser={selectedUser}
+        userPosts={userPosts}
       />
     </Box>
   );
