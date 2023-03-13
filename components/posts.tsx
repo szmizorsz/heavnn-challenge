@@ -1,5 +1,4 @@
-import { useState, useEffect } from "react";
-import axios from "axios";
+import { useState } from "react";
 import {
   Table,
   Thead,
@@ -12,30 +11,25 @@ import {
   Text,
   Flex,
   Box,
+  useDisclosure,
 } from "@chakra-ui/react";
-import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-
-interface Post {
-  id: number;
-  title: string;
-  body: string;
-}
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  EditIcon,
+  DeleteIcon,
+} from "@chakra-ui/icons";
+import usePosts from "@/hooks/usePosts";
+import { Post } from "@/types/customTypes";
+import EditModal from "./editModal";
 
 export default function Posts() {
-  const [posts, setPosts] = useState<Post[]>([]);
+  const { posts } = usePosts();
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(25);
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      const res = await axios.get<Post[]>(
-        "https://jsonplaceholder.typicode.com/posts"
-      );
-      setPosts(res.data);
-    };
-
-    fetchPosts();
-  }, []);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
@@ -61,6 +55,21 @@ export default function Posts() {
       ? posts.length
       : currentPage * postsPerPage;
 
+  const handleDelete = (id: number) => {
+    console.log("Post should be deleted: " + id);
+  };
+
+  const handleEdit = (post: Post) => {
+    setSelectedPost(post);
+    onOpen();
+  };
+
+  const handleSaveChanges = (editedPost: Post) => {
+    console.log("Post should be saved: " + editedPost);
+    setSelectedPost(null);
+    onClose();
+  };
+
   return (
     <Box w="50%" mx="auto" mt={10} mb={20}>
       <Table variant="simple">
@@ -77,6 +86,26 @@ export default function Posts() {
               <Td>{post.id}</Td>
               <Td>{post.title}</Td>
               <Td>{post.body}</Td>
+              <Td>
+                <HStack>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    leftIcon={<EditIcon />}
+                    onClick={() => handleEdit(post)}
+                  >
+                    Edit
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    leftIcon={<DeleteIcon />}
+                    onClick={() => handleDelete(post.id)}
+                  >
+                    Delete
+                  </Button>
+                </HStack>
+              </Td>
             </Tr>
           ))}
         </Tbody>
@@ -107,6 +136,12 @@ export default function Posts() {
           posts
         </Text>
       </Flex>
+      <EditModal
+        isOpen={isOpen}
+        onClose={onClose}
+        selectedPost={selectedPost}
+        handleSaveChanges={handleSaveChanges}
+      />
     </Box>
   );
 }
