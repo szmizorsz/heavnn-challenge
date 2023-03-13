@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import axios from "axios";
 import {
   Table,
   Thead,
@@ -13,18 +14,38 @@ import {
   Box,
 } from "@chakra-ui/react";
 import { ChevronLeftIcon, ChevronRightIcon } from "@chakra-ui/icons";
-import usePosts from "@/hooks/usePosts";
+
+interface Post {
+  id: number;
+  title: string;
+  body: string;
+}
 
 export default function Posts() {
-  const { posts } = usePosts();
+  const [posts, setPosts] = useState<Post[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [postsPerPage] = useState(25);
+
+  useEffect(() => {
+    const fetchPosts = async () => {
+      const res = await axios.get<Post[]>(
+        "https://jsonplaceholder.typicode.com/posts"
+      );
+      setPosts(res.data);
+    };
+
+    fetchPosts();
+  }, []);
 
   const indexOfLastPost = currentPage * postsPerPage;
   const indexOfFirstPost = indexOfLastPost - postsPerPage;
   const currentPosts = posts.slice(indexOfFirstPost, indexOfLastPost);
 
   const totalPages = Math.ceil(posts.length / postsPerPage);
+
+  const handleClick = (pageNumber: number) => {
+    setCurrentPage(pageNumber);
+  };
 
   const handlePrevClick = () => {
     setCurrentPage(currentPage - 1);
